@@ -33,18 +33,29 @@ jobs:
         pip install -r requirements.txt
         
     - name: Run Unit Tests
+      env:
+        PYTHONPATH: .
       run: |
         pytest tests/unit/ -v
         
     - name: Run Integration Tests
+      env:
+        PYTHONPATH: .
+        WAREHOUSE_PATH: "file:///tmp/warehouse"
       run: |
         # Iceberg local file catalog is used here without needing MinIO to pass
         pytest tests/integration/ -v
         
     - name: Run Performance Tests
+      env:
+        PYTHONPATH: .
+        WAREHOUSE_PATH: "file:///tmp/warehouse"
       run: |
         pytest tests/performance/ -v
         
     - name: Validate Iceberg Schema
+      env:
+        PYTHONPATH: .
+        WAREHOUSE_PATH: "file:///tmp/warehouse"
       run: |
         pytest tests/integration/test_schema_validation.py -v
