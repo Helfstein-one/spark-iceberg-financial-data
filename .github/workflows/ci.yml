@@ -9,10 +9,6 @@ on:
 jobs:
   test-and-validate:
     runs-on: ubuntu-latest
-    
-    # We use a container that already has Java 17 to speed up Spark setup
-    container:
-      image: openjdk:17-slim
 
     steps:
     - uses: actions/checkout@v3
@@ -24,8 +20,8 @@ jobs:
         
     - name: Install System Dependencies
       run: |
-        apt-get update
-        apt-get install -y procps libc6 gcc default-jre
+        sudo apt-get update
+        sudo apt-get install -y default-jre openjdk-17-jre-headless
         
     - name: Install Python Dependencies
       run: |
