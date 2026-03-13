@@ -65,7 +65,7 @@ class BaseETL(ABC):
         df.write \
             .format("iceberg") \
             .mode(mode) \
-            .save(f"local.{table_name}")
+            .saveAsTable(f"local.{table_name}")
 
     def run(self):
         """Main execution flow"""
