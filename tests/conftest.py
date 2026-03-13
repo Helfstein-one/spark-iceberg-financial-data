@@ -11,9 +11,16 @@ def spark():
     Creates a local SparkSession for testing, ignoring S3/Iceberg configs
     for pure unit testing speed, or mocking them as needed.
     """
+    iceberg_version = "3.5_2.12:1.5.0"
+    
     spark = SparkSession.builder \
         .appName("pytest-spark-testing") \
         .master("local[2]") \
+        .config("spark.jars.packages", f"org.apache.iceberg:iceberg-spark-runtime-{iceberg_version},org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262") \
+        .config("spark.sql.extensions", "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions") \
+        .config("spark.sql.catalog.local", "org.apache.iceberg.spark.SparkCatalog") \
+        .config("spark.sql.catalog.local.type", "hadoop") \
+        .config("spark.sql.catalog.local.warehouse", "file:///tmp/warehouse") \
         .getOrCreate()
     yield spark
     spark.stop()
