@@ -1,7 +1,10 @@
+import os
 import pytest
 from pyspark.sql import SparkSession
 from faker import Faker
 import uuid
+
+os.environ["PYSPARK_SUBMIT_ARGS"] = "--packages org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0,org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 pyspark-shell"
 
 fake = Faker()
 
