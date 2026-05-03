@@ -1,0 +1,14 @@
+{
+  "table_name": "financial_transactions_prod",
+  "columns": [
+    {"name": "transaction_id", "type": "StringType"},
+    {"name": "user_id", "type": "StringType"},
+    {"name": "gross_amount", "type": "DoubleType"},
+    {"name": "tax", "type": "DoubleType"},
+    {"name": "transaction_code", "type": "StringType"},
+    {"name": "timestamp", "type": "StringType"},
+    {"name": "net_amount", "type": "DoubleType"},
+    {"name": "category", "type": "StringType"},
+    {"name": "anonymized_user", "type": "StringType"}
+  ]
+}

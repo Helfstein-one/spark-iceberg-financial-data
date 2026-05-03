@@ -20,6 +20,26 @@ class TestFinancialETLUnit:
             expected_net = round(row["gross_amount"] - row["tax"], 2)
             assert round(row["net_amount"], 2) == expected_net
 
+    def test_calculate_net_amount_edge_cases(self, spark):
+        data = [
+            {"id": 1, "gross_amount": 0.0, "tax": 0.0},
+            {"id": 2, "gross_amount": -10.5, "tax": 2.0},
+            {"id": 3, "gross_amount": None, "tax": 5.0},
+            {"id": 4, "gross_amount": 100.0, "tax": None},
+            {"id": 5, "gross_amount": None, "tax": None}
+        ]
+        df = spark.createDataFrame(data)
+        etl = FinancialETL(df)
+        
+        result_df = etl._calculate_net_amount(df)
+        results = {row["id"]: row["net_amount"] for row in result_df.collect()}
+        
+        assert results[1] == 0.0
+        assert results[2] == -12.5
+        assert results[3] is None
+        assert results[4] is None
+        assert results[5] is None
+
     def test_categorize_transaction(self, spark, fake_financial_data):
         # We manually craft a small df to test specific branches of `when`
         data = [

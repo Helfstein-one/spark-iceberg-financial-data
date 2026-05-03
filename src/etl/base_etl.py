@@ -69,6 +69,23 @@ class BaseETL(ABC):
 
     def run(self):
         """Main execution flow"""
+        import logging
+        import time
+        logger = logging.getLogger(self.job_name)
+        
+        start_time = time.time()
+        logger.info(f"Starting job: {self.job_name}")
+        
         extracted_df = self.extract()
+        extracted_count = extracted_df.count()
+        logger.info(f"Extracted {extracted_count} rows")
+        
         transformed_df = self.transform(extracted_df)
+        transformed_count = transformed_df.count()
+        logger.info(f"Transformed {transformed_count} rows")
+        
+        end_time = time.time()
+        execution_time = end_time - start_time
+        logger.info(f"Job {self.job_name} finished in {execution_time:.2f} seconds")
+        
         return transformed_df
