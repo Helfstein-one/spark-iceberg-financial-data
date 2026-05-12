@@ -7,7 +7,9 @@ class TestFinancialETLIntegration:
     generating data and attempting a local Iceberg write.
     """
 
-    def test_full_pipeline_process(self, spark, fake_financial_data):
+    def test_full_pipeline_process(self, spark, fake_financial_data, monkeypatch):
+        monkeypatch.setattr(FinancialETL, "_initialize_spark", lambda self: spark)
+
         # 1. Generate fake source data
         df = fake_financial_data(num_records=50)
         
@@ -31,5 +33,5 @@ class TestFinancialETLIntegration:
         etl.load_to_iceberg(final_df, "financial_transactions", mode="overwrite")
         
         # 6. Read back from local catalog to assure persistence worked
-        read_df = spark.table("local.financial_transactions")
+        read_df = spark.table("nessie.financial_transactions")
         assert read_df.count() == 50
