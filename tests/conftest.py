@@ -4,7 +4,12 @@ from pyspark.sql import SparkSession
 from faker import Faker
 import uuid
 
-os.environ["PYSPARK_SUBMIT_ARGS"] = "--packages org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0,org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 pyspark-shell"
+os.environ["PYSPARK_SUBMIT_ARGS"] = "--packages org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0,org.projectnessie.nessie-integrations:nessie-spark-extensions-3.5_2.12:0.77.1,org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 pyspark-shell"
+
+os.environ["WAREHOUSE_PATH"] = "file:///tmp/warehouse"
+os.environ["AWS_ACCESS_KEY_ID"] = "testing"
+os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
+os.environ["S3_ENDPOINT"] = "http://localhost:9000"
 
 fake = Faker()
 
@@ -19,11 +24,11 @@ def spark():
     spark = SparkSession.builder \
         .appName("pytest-spark-testing") \
         .master("local[2]") \
-        .config("spark.jars.packages", f"org.apache.iceberg:iceberg-spark-runtime-{iceberg_version},org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262") \
-        .config("spark.sql.extensions", "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions") \
-        .config("spark.sql.catalog.local", "org.apache.iceberg.spark.SparkCatalog") \
-        .config("spark.sql.catalog.local.type", "hadoop") \
-        .config("spark.sql.catalog.local.warehouse", "file:///tmp/warehouse") \
+        .config("spark.jars.packages", f"org.apache.iceberg:iceberg-spark-runtime-{iceberg_version},org.projectnessie.nessie-integrations:nessie-spark-extensions-3.5_2.12:0.77.1,org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262") \
+        .config("spark.sql.extensions", "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions,org.projectnessie.spark.extensions.NessieSparkSessionExtensions") \
+        .config("spark.sql.catalog.nessie", "org.apache.iceberg.spark.SparkCatalog") \
+        .config("spark.sql.catalog.nessie.type", "hadoop") \
+        .config("spark.sql.catalog.nessie.warehouse", "file:///tmp/warehouse") \
         .getOrCreate()
     yield spark
     spark.stop()

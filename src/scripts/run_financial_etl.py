@@ -22,16 +22,21 @@ def main():
     } for _ in range(100)]
     
     spark = SparkSession.builder.appName("airflow-triggered-job") \
-        .config("spark.jars.packages", "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0,org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262") \
-        .config("spark.sql.extensions", "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions") \
-        .config("spark.sql.catalog.local", "org.apache.iceberg.spark.SparkCatalog") \
-        .config("spark.sql.catalog.local.type", "hadoop") \
-        .config("spark.sql.catalog.local.warehouse", "s3a://warehouse/") \
-        .config("spark.hadoop.fs.s3a.endpoint", "http://minio:9000") \
-        .config("spark.hadoop.fs.s3a.access.key", "minioadmin") \
-        .config("spark.hadoop.fs.s3a.secret.key", "minioadmin") \
-        .config("spark.hadoop.fs.s3a.path.style.access", "true") \
-        .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
+        .config("spark.driver.memory", "512m") \
+        .config("spark.executor.memory", "512m") \
+        .config("spark.jars.packages", "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0,org.projectnessie.nessie-integrations:nessie-spark-extensions-3.5_2.12:0.77.1,org.apache.iceberg:iceberg-aws-bundle:1.5.0") \
+        .config("spark.sql.extensions", "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions,org.projectnessie.spark.extensions.NessieSparkSessionExtensions") \
+        .config("spark.sql.catalog.nessie", "org.apache.iceberg.spark.SparkCatalog") \
+        .config("spark.sql.catalog.nessie.catalog-impl", "org.apache.iceberg.nessie.NessieCatalog") \
+        .config("spark.sql.catalog.nessie.uri", os.getenv("NESSIE_URI", "http://nessie:19120/api/v1")) \
+        .config("spark.sql.catalog.nessie.ref", "main") \
+        .config("spark.sql.catalog.nessie.authentication.type", "NONE") \
+        .config("spark.sql.catalog.nessie.warehouse", "s3://warehouse/") \
+        .config("spark.sql.catalog.nessie.io-impl", "org.apache.iceberg.aws.s3.S3FileIO") \
+        .config("spark.sql.catalog.nessie.s3.endpoint", "http://minio:9000") \
+        .config("spark.sql.catalog.nessie.s3.access-key-id", "minioadmin") \
+        .config("spark.sql.catalog.nessie.s3.secret-access-key", "minioadmin") \
+        .config("spark.sql.catalog.nessie.s3.path-style-access", "true") \
         .master("local[*]") \
         .getOrCreate()
         
@@ -45,7 +50,7 @@ def main():
         .format("iceberg") \
         .partitionBy("category") \
         .mode("append") \
-        .save("local.financial_transactions_prod")
+        .saveAsTable("nessie.financial_transactions_prod")
         
     print(f"Job finished. Ingested {final_df.count()} records.")
 

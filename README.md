@@ -10,7 +10,8 @@ O fluxo geral consiste na orquestração de uma DAG pelo Airflow, que dispara a 
 flowchart TD
     Airflow[Apache Airflow: Orquestrador] -->|Dispara DAG \n spark-submit| SparkJob[Spark/Glue Job Container\nFinancialETL OOP]
     SparkJob -->|Geração de Dados em ML\nProcessamento ETL| SparkJob
-    SparkJob -->|Grava Tabelas Iceberg \n via s3a://| MinIO[(MinIO S3 Compatible Storage)]
+    SparkJob -->|Grava Metadados/Branches| Nessie[Project Nessie: Catalog]
+    SparkJob -->|Grava Arquivos Parquet/Iceberg \n via s3a://| MinIO[(MinIO S3 Compatible Storage)]
     
     subgraph Data Pipeline Test Strategy
         Pytest[Pytest Framework] -->|Chama Métodos OO| SparkJob
@@ -19,6 +20,7 @@ flowchart TD
     
     style Airflow fill:#e8fdf5,stroke:#01a982,stroke-width:2px;
     style SparkJob fill:#fdebd0,stroke:#e67e22,stroke-width:2px;
+    style Nessie fill:#d0ece7,stroke:#1abc9c,stroke-width:2px;
     style MinIO fill:#ebdef0,stroke:#8e44ad,stroke-width:2px;
     style Pytest fill:#e8f4f8,stroke:#3498db,stroke-width:2px;
 ```
@@ -37,9 +39,10 @@ flowchart TD
     ```
     *(Aguarde alguns instantes até que o Airflow inicialize o banco de dados).*
 
-2. **Acessar os Recursos:**
+3. **Acessar os Recursos:**
     - **Apache Airflow Interface**: `http://localhost:8080` (user: `airflow`, pass: `airflow`)
     - **MinIO Console (S3 Mock)**: `http://localhost:9001` (user: `minioadmin`, pass: `minioadmin`)
+    - **Nessie Catalog API**: `http://localhost:19120/api/v1`
 
 3. **Execução do Job Glue (Spark/Iceberg)**:
     No painel do Airflow, ligue (`Unpause`) a DAG `financial_glue_simulation_trigger` e aperte Play. 

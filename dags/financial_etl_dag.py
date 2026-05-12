@@ -27,7 +27,7 @@ run_etl_task = SparkSubmitOperator(
     application='/opt/airflow/src/scripts/run_financial_etl.py',
     conn_id='spark_default',
     # Pass relevant packages here or inside the python script's spark session
-    packages='org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0,org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262',
+    packages='org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0,org.projectnessie.nessie-integrations:nessie-spark-extensions-3.5_2.12:0.77.1,org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262',
     name='airflow-triggered-job',
     verbose=True,
     dag=dag,
